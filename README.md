@@ -141,6 +141,53 @@ YOLO v8 or v5 학습
             - 일반적으로 10~15도가 안정적인 범위
             - 만약 물체가 항상 정방향(예: CCTV 고정 각도)으로 나오는 경우라면, 회전 증강은 오히려 노이즈가 될 수 있음
 
+### 수중 환경 최적화 방법
+1. 이미지 전처리 (Preprocessing)
+    - YOLO 입력 전에 이미지 품질을 개선하는 작업
+
+    | 기법                              | 설명                            | 코드 예시                                                                              |
+    | ------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------- |
+    | **CLAHE**                       | 대비 향상 (어두운 환경에 효과적)           | `cv2.createCLAHE()`                                                                |
+    | **White Balance**               | 색상 왜곡 보정 (청록색 물 제거)           | 수동 RGB 스케일링                                                                        |
+    | **Histogram Equalization**      | 전체 밝기/색상 분포 개선                | `cv2.equalizeHist()`                                                               |
+    | **Dehazing / Color Correction** | 색상 복원 (OpenCV X, 전용 라이브러리 필요) | [https://github.com/zhanghang1989/DCPDN](https://github.com/zhanghang1989/DCPDN) 등 |
+    | **Bilateral Filter**            | 노이즈 제거 + 경계 유지                | `cv2.bilateralFilter()`                                                            |
+- 예시
+    ```python
+    def preprocess_image(img):
+        # Convert to LAB for CLAHE
+        lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+        cl = clahe.apply(l)
+        lab = cv2.merge((cl, a, b))
+        img_clahe = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+
+        # White balance correction
+        result = cv2.cvtColor(img_clahe, cv2.COLOR_BGR2LAB)
+        avg_a = result[..., 1].mean()
+        avg_b = result[..., 2].mean()
+        result[..., 1] = result[..., 1] - ((avg_a - 128) * (result[..., 0] / 255.0) * 1.1)
+        result[..., 2] = result[..., 2] - ((avg_b - 128) * (result[..., 0] / 255.0) * 1.1)
+        result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
+
+        return result
+    ```
+
+2. YOLO Threshold 조정
+    - YOLO의 출력에서 confidence threshold와 NMS threshold를 조정해 정확도를 높일 수 있음
+        
+        ```python
+        results = model(frame, conf=0.3, iou=0.4)[0]
+        ```
+        
+    | 파라미터   | 설명                  | 추천값                                 |
+    | ------ | ------------------- | ----------------------------------- |
+    | `conf` | 탐지 신뢰도 필터링          | `0.25 ~ 0.4` (수중은 낮춰야 놓치는 객체 ↓)     |
+    | `iou`  | NMS (겹치는 박스 제거 임계값) | `0.4 ~ 0.6` (너무 낮으면 겹치는 물고기 하나만 남음) |
+
+
+
 ### 학습결과 및 테스트
 1. 결과 확인
     - 학습이 끝나면 runs/detect/train/ 폴더에 결과 저장
@@ -152,3 +199,84 @@ YOLO v8 or v5 학습
 2. 학습한 모델로 테스트
     - 결과는 runs/detect/predict/ 폴더에 저장
     - 결과 안의 box 좌표도 results[0].boxes.xyxy 등으로 추출 가능
+
+## 실시간 추적
+
+### 탐지 모델
+
+#### ByteTrack
+1. 설치
+    ```shell
+    pip install lap cython
+    pip install git+https://github.com/ifzhang/ByteTrack.git
+    ```
+2. ByteTrack 설정
+    | 파라미터 이름        | 기본값 예시  | 설명                                                                      |
+    | -------------- | ------- | ----------------------------------------------------------------------- |
+    | `track_thresh` | `0.5`   | **추적 시작 임계값**. 탐지 신뢰도가 이 값 이상이어야 추적 시작. 너무 낮으면 오탐 추적, 너무 높으면 검출 누락.     |
+    | `match_thresh` | `0.8`   | **기존 트랙과 새로운 탐지 간 매칭 허용 오차**. 1에 가까울수록 덜 까다롭게 매칭 (ID 유지 ↑), 너무 높으면 오매칭↑ |
+    | `track_buffer` | `30`    | 추적 ID 유지 시간 (프레임 수). 이 시간 내에 다시 보이면 ID 유지, 지나면 삭제됨.                     |
+    | `frame_rate`   | `30`    | FPS 값. 추적기 내부의 시간 기반 로직에서 사용됨. 영상이나 웹캠의 실제 FPS에 맞춰야 정확도 ↑               |
+    | `mot20`        | `False` | MOT20 벤치마크용 설정. 일반적으로 `False`.                                          |
+    | `min_box_area` | `0`     | 너무 작은 박스는 무시 (잡음 제거용). 작은 물고기 필터링에 사용 가능.                               |
+    | `iou_thresh`   | `0.5`   | **IoU 기반의 추적 매칭 임계값**. 기존 추적과 새 탐지 간의 IoU가 이 이상이어야 매칭.                  |
+    | `track_thresh` | `0.5`   | 다시 나오는 객체에 대해 추적 재시작을 허용하는 confidence 기준                                |
+    | `use_byte`     | `True`  | ByteTrack 알고리즘 핵심 기능 사용 여부 (True 권장)                                    |
+    | `match_thresh` | `0.8`   | 외형 정보 없이 IoU로만 매칭할 때의 임계값                                               |
+    | `with_reid`    | `False` | Deep SORT처럼 appearance feature로도 추적할지 여부 (ByteTrack 기본은 False)          |
+
+    ```python
+    tracker_args = {
+    "track_thresh": 0.4,       # 너무 낮으면 오탐, 너무 높으면 놓침
+    "match_thresh": 0.7,       # 물고기 유사하게 생겼으면 너무 높이면 ID 바뀔 수 있음
+    "track_buffer": 30,        # 30프레임(1초) 정도 ID 유지
+    "frame_rate": 30,          # 웹캠이나 영상의 실제 FPS에 맞춤
+    "min_box_area": 100,       # 너무 작은 노이즈 제거 (원하는 만큼 조절)
+    "iou_thresh": 0.5,         # 트랙 매칭 기준
+    "mot20": False             # 일반 환경이면 False
+    }
+    ```
+
+#### Deep SORT
+
+##### ReID란? (Re-Identification)
+- **ReID (Re-identification, 재식별)**은 다음과 같은 작업을 의미
+    - "이 프레임에서 본 객체 A가, 다음 프레임 또는 다른 카메라에서도 여전히 같은 객체 A인가?"
+- 예시
+    - 프레임 1: 물고기 A가 있음
+    - 프레임 5: 비슷하게 생긴 물고기 B도 있음
+        - 단순히 위치나 IoU로만 판단하면 ID가 바뀔 수 있음
+        - 그래서 외형(appearance) 특징을 사용해서 객체를 "식별"하는 것이 ReID
+
+##### ReID 학습이 필요한 이유
+| 상황                 | 문제가 생기는 이유   |
+| ------------------ | ------------ |
+| 비슷한 물고기 여러 마리      | 위치만으로 구분 불가능 |
+| 빠르게 움직여서 박스가 튐     | IoU로 연결 실패   |
+| 물고기가 잠깐 가려졌다 다시 등장 | ID가 새로 부여됨   |
+
+- 이럴 때 ReID는 물고기의 색상, 무늬, 형태 등을 벡터(특징값)로 추출해서 ID를 유지할 수 있게 도와줌
+
+##### ReID 학습 방식 요약
+1. 데이터 수집
+    - 동일한 물고기를 여러 각도/시점에서 촬영
+    - 각 물고기마다 ID를 붙인 데이터셋 구성 필요
+2. 모델 학습 (ImageNet 기반 CNN 사용 가능)
+    - 입력: 물고기 이미지
+    - 출력: 특징 벡터 (예: 512차원 벡터)
+    - 목적: 같은 ID는 비슷한 벡터, 다른 ID는 멀어지도록 학습
+3. 추적기와 통합
+    - 프레임마다 YOLO → 물고기 박스 추출
+    - 박스 안 이미지를 ReID 모델에 넣어서 feature vector 추출
+    - 벡터 유사도 + 위치로 추적 매칭 수행 (Deep SORT 방식)
+
+##### 실제 ReID를 적용할 수 있는 경우
+- 고정된 수조 안에서 개별 물고기를 구별하고 싶다
+    - 연구, 개체 행동 분석
+- 다른 카메라/프레임 간 물고기 ID 유지가 중요하다
+- 외형 구분이 확실한 종 (무늬, 색상이 다른 물고기들)
+
+##### 적용이 어렵거나 불필요한 경우
+- 물고기 외형이 거의 동일함 (ReID로도 구분 불가능)
+- 목표가 단순 "몇 마리 추적"만일 때
+- 실시간 속도 최우선 (ReID는 연산량이 큼)
