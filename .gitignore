@@ -405,3 +405,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /yolov_env
+/YOLO_V8/Guppy_fish_dataset_YOLO
