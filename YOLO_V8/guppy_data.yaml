@@ -1,0 +1,6 @@
+test: Guppy_fish_dataset_YOLO/test/images  # 데이터 루트 디렉터리
+train: Guppy_fish_dataset_YOLO/train/images
+val: Guppy_fish_dataset_YOLO/valid/images
+
+nc: 1
+names: ['guppy']
