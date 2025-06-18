@@ -202,6 +202,10 @@ YOLO v8 or v5 학습
 
 ## 실시간 추적
 
+1. 모델 학습 시 추적알고리즘은 사용되지 않음
+    - YOLO 모델을 이용해 객체 감지 후 추적알고리즘을 적용하여 객체를 추적
+    - 즉, YOLO는 객체를 감지하고, ByteTrack은 그 감지된 객체들이 어떤 것인지 추적
+
 ### 탐지 모델
 
 #### ByteTrack
@@ -236,6 +240,8 @@ YOLO v8 or v5 학습
     "mot20": False             # 일반 환경이면 False
     }
     ```
+3. np.float은 numpy 버전이 올라가서 사라짐
+    - byte_tracker.py, matching.py 파일 안의 np.float 형식을 np.float64로 수정해야함
 
 #### Deep SORT
 
