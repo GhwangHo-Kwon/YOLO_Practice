@@ -406,3 +406,4 @@ FodyWeavers.xsd
 *.sln.iml
 /yolov_env
 /YOLO_V8/Guppy_fish_dataset_YOLO
+/YOLO_V8/yolov5
