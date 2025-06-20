@@ -1,6 +1,8 @@
 # YOLO_Practice
 YOLO v8 or v5 학습
 
+[success](./YOLO_V8/success/) - 오류 안나는 코드 저장된 폴더
+
 ## YOLO v8 설치
 
 ### 가상환경 설정
