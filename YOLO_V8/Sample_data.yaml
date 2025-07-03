@@ -3,4 +3,4 @@ train: ../Sample_data/train/images
 val: ../Sample_data/valid/images
 
 nc: 1
-names: ['guppy']
+names: ['robot_fish']
