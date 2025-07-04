@@ -1,7 +1,7 @@
 # YOLO_Practice
 YOLO v8 or v5 학습
 
-[success](./YOLO_V8/success/) - 오류 안나는 코드 저장된 폴더
+[Tracking_And_Learning](./YOLO_V8/Tracking_And_Learning/) - 학습 및 트래킹 폴더
 
 ## YOLO v8 설치
 
