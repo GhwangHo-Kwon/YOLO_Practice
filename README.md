@@ -3,6 +3,10 @@ YOLO v8 or v5 학습
 
 [Tracking_And_Learning](./YOLO_V8/Tracking_And_Learning/) - 학습 및 트래킹 폴더
 
+- 로봇 물고기 데이터 학습 후 추적 결과영상
+
+https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
+
 ## YOLO v8 설치
 
 ### 가상환경 설정
