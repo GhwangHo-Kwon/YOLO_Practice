@@ -158,7 +158,7 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
     | **White Balance**               | 색상 왜곡 보정 (청록색 물 제거)           | 수동 RGB 스케일링                                                                        |
     | **Histogram Equalization**      | 전체 밝기/색상 분포 개선                | `cv2.equalizeHist()`                                                               |
     | **Bilateral Filter**            | 노이즈 제거 + 경계 유지                | `cv2.bilateralFilter()`                                                            |
-- 예시
+<!-- - 예시
     ```python
     def preprocess_image(img):
         # Convert to LAB for CLAHE
@@ -178,7 +178,7 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
         result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
 
         return result
-    ```
+    ``` -->
 
 2. YOLO Threshold 조정
     - YOLO의 출력에서 confidence threshold와 NMS threshold를 조정해 정확도를 높일 수 있음
