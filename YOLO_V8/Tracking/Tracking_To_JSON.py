@@ -5,7 +5,7 @@ from ultralytics import YOLO
 
 # 경로 설정
 video_path = './YOLO_V8/Sample_data/sample_robot_fish.mp4'
-model = YOLO('./runs/detect/train4/weights/best.pt')  # 학습된 Guppy 탐지 모델
+model = YOLO('./runs/detect/train4/weights/best.pt')  # 학습된 물고기 탐지 모델
 
 # 비디오 읽기
 cap = cv2.VideoCapture(video_path)
@@ -37,7 +37,7 @@ while cap.isOpened():
     frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
     # 🔍 객체 추적
-    results = model.track(source=frame, conf=0.6, persist=True, verbose=False, save_txt=True, tracker="./YOLO_V8/bytetrack.yaml")
+    results = model.track(source=frame, conf=0.6, persist=True, verbose=False, save_txt=False, tracker="./YOLO_V8/Tracking/bytetrack.yaml")
 
     # 결과 시각화
     annotated_frame = results[0].plot()
@@ -68,7 +68,7 @@ while cap.isOpened():
 
 # 추적된 객체 데이터를 JSON 형식으로 저장
 # Tensor 값을 JSON 직렬화 가능하도록 변환 후 저장
-with open('tracked_sample_robot_fish.json', 'w') as json_file:
+with open('./YOLO_V8/Tracking/tracked_sample_robot_fish.json', 'w') as json_file:
     # tracked_objects의 모든 Tensor 값을 숫자 값으로 변환
     # (예: bbox, confidence 등)
     def convert_tensor(obj):

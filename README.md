@@ -1,7 +1,8 @@
 # YOLO_Practice
 YOLO v8 or v5 학습
 
-[Tracking_And_Learning](./YOLO_V8/Tracking_And_Learning/) - 학습 및 트래킹 폴더
+[Learning](./YOLO_V8/Learning/) - 학습 폴더
+[Tracking](./YOLO_V8/Tracking/) - 트래킹 폴더
 
 - 로봇 물고기 데이터 학습 후 추적 결과영상
 
@@ -156,7 +157,6 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
     | **CLAHE**                       | 대비 향상 (어두운 환경에 효과적)           | `cv2.createCLAHE()`                                                                |
     | **White Balance**               | 색상 왜곡 보정 (청록색 물 제거)           | 수동 RGB 스케일링                                                                        |
     | **Histogram Equalization**      | 전체 밝기/색상 분포 개선                | `cv2.equalizeHist()`                                                               |
-    | **Dehazing / Color Correction** | 색상 복원 (OpenCV X, 전용 라이브러리 필요) | [https://github.com/zhanghang1989/DCPDN](https://github.com/zhanghang1989/DCPDN) 등 |
     | **Bilateral Filter**            | 노이즈 제거 + 경계 유지                | `cv2.bilateralFilter()`                                                            |
 - 예시
     ```python
@@ -207,8 +207,8 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
     - 결과 안의 box 좌표도 results[0].boxes.xyxy 등으로 추출 가능
 
 ## 순차적 학습 (Active Learning)에 대해
-- [Labeling 파일](./YOLO_V8/Test_Learning/Video_Labeling.py)
-- [Trainer 파일](./YOLO_V8/Test_Learning/Video_Trainer.py)
+- [Labeling 파일](./YOLO_V8/Learning/Video_Labeling.py)
+- [Trainer 파일](./YOLO_V8/Learning/Video_Trainer.py)
 
 - 자동 라벨링을 처음부터 끝까지 완전히 자동화하는 것은 어려움 → **초기 학습**은 수동 라벨링으로 시작
 - 이후 모델이 일정 수준으로 **인식 능력을 갖추면** 자동화된 라벨링을 활용해 **반복적으로 학습**시키는 방식이 일반적
@@ -273,12 +273,12 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
 ### 탐지 모델
 
 #### ByteTrack
-1. 설치
+<!-- 1. 설치
     ```shell
     pip install lap cython
     pip install git+https://github.com/ifzhang/ByteTrack.git
-    ```
-2. ByteTrack 설정
+    ``` -->
+1. ByteTrack 설정
     | 파라미터 이름        | 기본값 예시  | 설명                                                                      |
     | -------------- | ------- | ----------------------------------------------------------------------- |
     | `track_thresh` | `0.5`   | **추적 시작 임계값**. 탐지 신뢰도가 이 값 이상이어야 추적 시작. 너무 낮으면 오탐 추적, 너무 높으면 검출 누락.     |
@@ -304,7 +304,7 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
     "mot20": False             # 일반 환경이면 False
     }
     ```
-3. np.float은 numpy 버전이 올라가서 사라짐
+2. np.float은 numpy 버전이 올라가서 사라짐
     - byte_tracker.py, matching.py 파일 안의 np.float 형식을 np.float64로 수정해야함
 
 #### Deep SORT
@@ -351,9 +351,7 @@ https://github.com/user-attachments/assets/3706794c-04f1-4a2f-8ac4-8e1e383e076e
 - 목표가 단순 "몇 마리 추적"만일 때
 - 실시간 속도 최우선 (ReID는 연산량이 큼)
 
-#### StrongSORT
-
-
+<!-- #### StrongSORT -->
 
 ### 물고기 좌표
 
