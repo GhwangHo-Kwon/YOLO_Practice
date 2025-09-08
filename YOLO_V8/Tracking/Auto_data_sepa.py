@@ -3,10 +3,10 @@ import random
 import shutil
 
 # ✅ 설정
-base_image_dir = './YOLO_V8/Sample_data/base_data/images/'   # 전체 이미지 폴더 경로
-base_label_dir = './YOLO_V8/Sample_data/base_data/labels/'   # 전체 라벨 폴더 경로
+base_image_dir = './YOLO_V8/datas/images/'   # 전체 이미지 폴더 경로
+base_label_dir = './YOLO_V8/datas/labels/'   # 전체 라벨 폴더 경로
 
-output_base = './YOLO_V8/Sample_data/'  # 출력 디렉토리
+output_base = './YOLO_V8/robot_data/'  # 출력 디렉토리
 
 # 분할 비율 설정 (총합 1.0)
 train_ratio = 0.7

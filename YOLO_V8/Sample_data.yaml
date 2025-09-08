@@ -1,6 +1,6 @@
-test: ../Sample_data/test/images  # 데이터 루트 디렉터리
-train: ../Sample_data/train/images
-val: ../Sample_data/valid/images
+test: ../robot_data/test/images  # 데이터 루트 디렉터리
+train: ../robot_data/train/images
+val: ../robot_data/valid/images
 
 nc: 1
 names: ['robot_fish']
